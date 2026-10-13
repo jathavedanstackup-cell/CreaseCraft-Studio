@@ -1,8 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-
-
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#111413">
@@ -11,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/studio.css?v=318dd4932798">
-  <script defer src="/studio.js?v=80c03627c10e"></script>
+  <link rel="stylesheet" href="/studio.css">
+  <script defer src="/studio.js"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -59,8 +57,10 @@
             <div class="tool-tag"><span class="status-pulse"></span><span id="canvas-context">STICKER CANVAS</span></div>
             <div class="canvas-tools">
               <button class="button button-ghost mini-action" id="toolbar-upload-btn">＋ Upload image</button>
-              <button class="button button-lime-soft mini-action" id="remove-bg-btn">✦ AI cutout</button>
-              <span class="zoom-label">100%</span>
+              <button class="button button-lime-soft mini-action" id="remove-bg-btn">✂ Remove background</button>
+              <button class="icon-button compact zoom-control" id="zoom-out-btn" title="Zoom out" aria-label="Zoom out">−</button>
+              <span class="zoom-label" id="zoom-label">100%</span>
+              <button class="icon-button compact zoom-control" id="zoom-in-btn" title="Zoom in" aria-label="Zoom in">＋</button>
               <button class="icon-button compact" id="reset-view-btn" title="Reset view">⌗</button>
               <button class="icon-button compact" id="checker-btn" title="Toggle checkerboard">▦</button>
               <button class="icon-button compact" id="fit-btn" title="Fit canvas">⤢</button>
@@ -144,12 +144,21 @@
             <div class="control-section">
               <div class="control-heading"><span>01 / ADD TYPOGRAPHY</span></div>
               <button class="add-type-button" id="add-text-btn"><span class="type-icon">T</span><span><b>Add a text layer</b><small>Player name, number, team or tagline</small></span><span class="add-symbol">＋</span></button>
+              <div class="shape-tools" aria-label="Add graphic shapes"><span class="eyebrow">ADD GRAPHIC</span><div class="shape-tool-row"><button type="button" data-add-shape="star" title="Add star">✦ Star</button><button type="button" data-add-shape="circle" title="Add circle">○ Circle</button><button type="button" data-add-shape="bolt" title="Add lightning">ϟ Bolt</button><button type="button" data-add-shape="stripe" title="Add speed stripe">╱ Stripe</button></div></div>
               <div class="field"><label for="team-text">Team / main text</label><input type="text" id="team-text" maxlength="30" value="NORTHSIDE" placeholder="Your team name"></div>
               <div class="field"><label for="number-text">Number / short text</label><input type="text" id="number-text" maxlength="4" value="07" placeholder="07"></div>
               <div class="field"><label for="tagline-text">Tagline</label><input type="text" id="tagline-text" maxlength="40" value="MADE TO STAND OUT" placeholder="Your tagline"></div>
               <div class="field"><label for="font-select">Display typeface</label><select id="font-select"><option value="Syne">Syne · Expressive</option><option value="DM Sans">DM Sans · Clean</option></select></div>
               <div class="field"><label for="type-color">Type colour</label><input type="color" id="type-color" value="#191D1E"></div>
-              <p class="help-note">Text fields update the sticker live. Use the layer list to move added text around the canvas.</p>
+              <div id="selected-layer-properties" class="selected-properties">
+                <div class="control-heading"><span>02 / SELECTED OBJECT</span><span class="eyebrow">PRECISE</span></div>
+                <div class="property-grid"><div class="field"><label for="layer-x">X position</label><input type="number" id="layer-x" min="0" max="760" step="1" value="380"></div><div class="field"><label for="layer-y">Y position</label><input type="number" id="layer-y" min="0" max="900" step="1" value="450"></div></div>
+                <div class="field-label-row"><label for="layer-color">Object colour</label><span class="eyebrow">CUSTOM</span></div><input type="color" id="layer-color" value="#191D1E">
+                <div class="slider-row"><label for="layer-size">Text size / shape scale</label><output id="layer-size-value">46</output></div><input type="range" id="layer-size" min="8" max="240" value="46">
+                <div class="slider-row"><label for="layer-rotation">Rotation</label><output id="layer-rotation-value">0°</output></div><input type="range" id="layer-rotation" min="-180" max="180" value="0">
+                <div class="slider-row"><label for="layer-opacity">Opacity</label><output id="layer-opacity-value">100%</output></div><input type="range" id="layer-opacity" min="0" max="100" value="100">
+              </div>
+              <p class="help-note">Use the layer list for visibility and stacking. Arrow keys nudge the selected object; Shift + arrow moves it by 10 units.</p>
             </div>
           </div>
 
@@ -170,7 +179,14 @@
               <div class="slider-row"><label for="photo-scale">Image scale</label><output id="scale-value">100%</output></div><input type="range" id="photo-scale" min="35" max="180" value="100">
               <div class="slider-row"><label for="photo-rotation">Rotation</label><output id="rotation-value">0°</output></div><input type="range" id="photo-rotation" min="-35" max="35" value="0">
               <button class="button button-ghost full-width" id="center-image-btn">◎ Centre image</button>
-              <div class="control-heading section-top"><span>02 / CANVAS</span></div>
+              <div class="control-heading section-top"><span>02 / IMAGE LOOK</span><span class="eyebrow">LIVE ADJUST</span></div>
+              <div class="slider-row"><label for="photo-brightness">Brightness</label><output id="photo-brightness-value">100%</output></div><input type="range" id="photo-brightness" min="0" max="200" value="100">
+              <div class="slider-row"><label for="photo-contrast">Contrast</label><output id="photo-contrast-value">100%</output></div><input type="range" id="photo-contrast" min="0" max="200" value="100">
+              <div class="slider-row"><label for="photo-saturation">Saturation</label><output id="photo-saturation-value">100%</output></div><input type="range" id="photo-saturation" min="0" max="200" value="100">
+              <div class="slider-row"><label for="photo-grayscale">Black &amp; white</label><output id="photo-grayscale-value">0%</output></div><input type="range" id="photo-grayscale" min="0" max="100" value="0">
+              <div class="slider-row"><label for="photo-sepia">Vintage sepia</label><output id="photo-sepia-value">0%</output></div><input type="range" id="photo-sepia" min="0" max="100" value="0">
+              <button class="button button-ghost full-width" id="reset-photo-adjustments">↺ Reset image look</button>
+              <div class="control-heading section-top"><span>03 / CANVAS</span></div>
               <div class="field-label-row"><label>Preview background</label></div>
               <div class="palette-row">
                 <button class="canvas-bg-option active" data-bg="checker"><span class="checker-swatch"></span><small>Transparent</small></button>
@@ -182,7 +198,7 @@
           </div>
 
           <div class="layer-section">
-            <div class="layer-heading"><span>LAYERS <span id="layer-count">0</span></span><button class="icon-button compact" id="add-layer-btn" title="Add text layer">＋</button></div>
+            <div class="layer-heading"><span title="Ctrl/Cmd+D duplicate · Ctrl/Cmd+[ or ] reorder · arrow keys nudge · Delete remove">LAYERS <span id="layer-count">0</span></span><button class="icon-button compact" id="add-layer-btn" title="Add text layer">＋</button></div>
             <div id="layer-list" class="layer-list"><div class="layer-empty">Your layers will appear here.</div></div>
           </div>
           <div class="inspector-footer"><span class="privacy-mark">◇</span><span>Your uploaded image is processed in your browser for cutout. Save it when you want to keep the design.</span></div>
@@ -193,6 +209,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <input type="file" id="file-input" accept="image/png,image/jpeg,image/webp" hidden>
+  <input type="file" id="project-input" accept="application/json,.json" hidden>
   <div class="modal-backdrop" id="modal-backdrop" hidden>
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal-head"><div><span class="eyebrow">YOUR CREATIVE WORKSPACE</span><h2 id="modal-title">My designs<span>.</span></h2></div><button class="icon-button" id="modal-close" aria-label="Close">×</button></div>
@@ -200,6 +217,8 @@
     </section>
   </div>
   <div class="export-popover" id="export-popover" hidden>
+    <button id="import-project-btn" class="import-project-action"><span class="export-type">OPEN</span><span><b>Open project</b><small>Import an editable .json project</small></span></button>
+    <button data-export="sheet"><span class="export-type">SHEET</span><span><b>Sticker sheet builder</b><small>Arrange copies on a print sheet</small></span></button>
     <button data-export="png"><span class="export-type">PNG</span><span><b>Transparent PNG</b><small>Best for sticker printing</small></span></button>
     <button data-export="svg"><span class="export-type">SVG</span><span><b>Vector artwork</b><small>Scalable sticker design</small></span></button>
     <button data-export="json"><span class="export-type">JSON</span><span><b>Design backup</b><small>Save editable settings</small></span></button>
