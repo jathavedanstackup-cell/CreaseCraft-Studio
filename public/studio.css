@@ -27,3 +27,43 @@
 .selected-properties input[type=color]{width:100%;height:30px;padding:3px;border:1px solid #3c4439;border-radius:6px;background:#202622}
 .selected-properties .slider-row{margin-top:12px}
 .sheet-builder{display:grid;gap:14px}.sheet-fields{display:grid;gap:10px}.sheet-fields .field{margin:0}.sheet-fields input,.sheet-fields select{width:100%;min-height:34px;padding:8px;border:1px solid #394137;border-radius:7px;background:#171c19;color:var(--text)}.sheet-status{padding:10px 12px;border-radius:8px;font-size:11px;line-height:1.5}.sheet-status.fits{background:#202a1c;border:1px solid #4c6232;color:#d8f3a0}.sheet-status.overflow{background:#321f1c;border:1px solid #6f3930;color:#ffd0c8}.sheet-preview-wrap{width:100%;max-height:430px;overflow:auto;background:#e2e2dd;border:1px solid #454b44;border-radius:8px;padding:12px;display:flex;align-items:flex-start;justify-content:center}.sheet-preview-wrap svg{display:block;width:auto;max-width:100%;height:auto;max-height:400px;filter:drop-shadow(0 3px 7px #0002)}.sheet-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}.sheet-actions .button:disabled{opacity:.4;cursor:not-allowed}
+
+/* v12 — accessible controls and a real mobile workspace */
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+button:disabled{cursor:not-allowed}
+.mobile-nav{display:none}
+.mobile-share-action{display:none!important}
+.layer-select-button{display:flex;align-items:center;gap:8px;flex:1;min-width:0;padding:0;border:0;border-radius:5px;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.layer-select-button:focus-visible{outline-offset:1px}
+.layer-select-button .layer-name{min-width:0}
+.layer-row:focus-within .layer-remove{opacity:1}
+.layer-action{min-width:25px;min-height:25px;display:inline-grid;place-items:center;border:1px solid transparent;border-radius:5px;background:transparent;color:#aeb8aa;line-height:1}
+.layer-action:hover{background:#30392a;border-color:#4d6033;color:var(--lime)}
+.layer-action[aria-pressed=true]{color:var(--lime)}
+.inspector-tab[aria-selected=true]{color:var(--lime)}
+.field label,.field-label-row label,.slider-row{font-size:11px}
+.help-note{font-size:10px;line-height:1.55}
+.template-name{font-size:11px}
+.template-card small{font-size:10px}
+@media(max-width:680px){.layer-action{width:25px!important;height:28px!important;min-width:25px;min-height:28px;font-size:12px}.layer-name{font-size:10px}}
+@media(max-width:580px){
+  .mobile-nav{position:fixed;z-index:20;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));border-top:1px solid #343d32;background:rgba(20,24,21,.97);backdrop-filter:blur(18px);box-shadow:0 -12px 35px #0004}
+  .mobile-nav-item{min-width:0;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:5px 3px;border:1px solid transparent;border-radius:9px;background:transparent;color:#a5afa1;font-size:10px;font-weight:600;line-height:1.1}
+  .mobile-nav-item .mobile-nav-glyph{font-size:18px;line-height:1.1}
+  .mobile-nav-item.active{background:#25301f;border-color:#465733;color:var(--lime)}
+  .mobile-nav-item:focus-visible{outline-offset:-2px}
+  .studio-content{padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+  .mobile-share-action{display:flex!important}
+  .export-popover{max-height:calc(100dvh - 82px);overflow-y:auto;overscroll-behavior:contain}
+  .modal-backdrop{padding:10px}
+  .modal{max-height:calc(100dvh - 20px)}
+}
+@media(max-width:380px){
+  .mobile-brand strong{display:none}
+  .topbar{gap:6px;padding-inline:9px}
+  .top-actions{gap:3px}
+  .top-actions #save-btn,.top-actions #export-menu-btn{padding-inline:8px;font-size:9px}
+  .canvas-toolbar{align-items:flex-start;flex-wrap:wrap;gap:5px}
+  .canvas-tools{min-width:0;max-width:100%;flex:1 1 auto;flex-wrap:wrap;justify-content:flex-end}
+  .tool-tag{font-size:8px}
+}

@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script>window.__HATCHABLE__&&(window.__HATCHABLE__.primaryOrigin="https://nextover.hatchable.site");</script>
+<script>window.__HATCHABLE__={"slug":"nextover","api":"/api","primaryOrigin":"https://nextover.hatchable.site"};</script><script src="/__hatchable/config.js?v=12"></script><script src="/__hatchable/badge.js?v=12&b=1" defer></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#111413">
@@ -9,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/studio.css">
-  <script defer src="/studio.js"></script>
+  <link rel="stylesheet" href="/studio.css?v=f24a8cb39242">
+  <script defer src="/studio.js?v=db5538738b99"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -20,8 +22,8 @@
         <span class="brand-type"><strong>CREASECRAFT</strong><small>STICKER STUDIO</small></span>
       </a>
       <div class="side-label">WORKSPACE</div>
-      <button class="nav-item active" data-nav="create"><span class="nav-glyph">✳</span><span>Create design</span></button>
-      <button class="nav-item" data-nav="templates"><span class="nav-glyph">▦</span><span>Templates</span><span class="nav-count">12</span></button>
+      <button class="nav-item active" data-nav="create" aria-current="page"><span class="nav-glyph" aria-hidden="true">✳</span><span>Create design</span></button>
+      <button class="nav-item" data-nav="templates"><span class="nav-glyph">▦</span><span>Templates</span><span class="nav-count">05</span></button>
       <button class="nav-item" data-nav="designs"><span class="nav-glyph">▧</span><span>My designs</span></button>
       <button class="nav-item" data-nav="brand"><span class="nav-glyph">◈</span><span>Brand colours</span></button>
       <div class="side-separator"></div>
@@ -41,7 +43,7 @@
         <div class="mobile-brand"><span class="brand-mark small-mark">C</span><strong>CREASECRAFT</strong></div>
         <div class="project-title"><span class="eyebrow">CURRENT PROJECT</span><input id="design-name" maxlength="70" value="Untitled sticker" aria-label="Design name"></div>
         <div class="top-actions">
-          <span id="save-status" class="save-status"><i></i><span>All changes local</span></span>
+          <span id="save-status" class="save-status" role="status" aria-live="polite" aria-atomic="true"><i aria-hidden="true"></i><span>All changes local</span></span>
           <button class="icon-button" id="undo-btn" title="Undo" aria-label="Undo">↶</button>
           <button class="icon-button" id="redo-btn" title="Redo" aria-label="Redo">↷</button>
           <span class="top-divider"></span>
@@ -99,11 +101,11 @@
 
         <aside class="inspector">
           <div class="inspector-header"><div><span class="eyebrow">CREATIVE CONTROLS</span><h2>Make it yours<span>.</span></h2></div><button class="icon-button compact" id="reset-design-btn" title="Reset design">⟳</button></div>
-          <div class="inspector-tabs" role="tablist">
-            <button class="inspector-tab active" data-tab="sticker">Sticker</button><button class="inspector-tab" data-tab="type">Type</button><button class="inspector-tab" data-tab="effects">Effects</button><button class="inspector-tab" data-tab="adjust">Adjust</button>
+          <div class="inspector-tabs" role="tablist" aria-label="Design controls">
+            <button id="tab-sticker" class="inspector-tab active" data-tab="sticker" role="tab" aria-selected="true" aria-controls="panel-sticker" tabindex="0">Sticker</button><button id="tab-type" class="inspector-tab" data-tab="type" role="tab" aria-selected="false" aria-controls="panel-type" tabindex="-1">Type</button><button id="tab-effects" class="inspector-tab" data-tab="effects" role="tab" aria-selected="false" aria-controls="panel-effects" tabindex="-1">Effects</button><button id="tab-adjust" class="inspector-tab" data-tab="adjust" role="tab" aria-selected="false" aria-controls="panel-adjust" tabindex="-1">Adjust</button>
           </div>
 
-          <div class="inspector-panel active" data-panel="sticker">
+          <div id="panel-sticker" class="inspector-panel active" data-panel="sticker" role="tabpanel" aria-labelledby="tab-sticker" tabindex="0">
             <div class="control-section">
               <div class="control-heading"><span>01 / OUTLINE</span><span class="tiny-badge">DIECUT</span></div>
               <div class="outline-options">
@@ -140,7 +142,7 @@
             </div>
           </div>
 
-          <div class="inspector-panel" data-panel="type">
+          <div id="panel-type" class="inspector-panel" data-panel="type" role="tabpanel" aria-labelledby="tab-type" tabindex="0" hidden>
             <div class="control-section">
               <div class="control-heading"><span>01 / ADD TYPOGRAPHY</span></div>
               <button class="add-type-button" id="add-text-btn"><span class="type-icon">T</span><span><b>Add a text layer</b><small>Player name, number, team or tagline</small></span><span class="add-symbol">＋</span></button>
@@ -162,7 +164,7 @@
             </div>
           </div>
 
-          <div class="inspector-panel" data-panel="effects">
+          <div id="panel-effects" class="inspector-panel" data-panel="effects" role="tabpanel" aria-labelledby="tab-effects" tabindex="0" hidden>
             <div class="control-section">
               <div class="control-heading"><span>01 / FINISH</span></div>
               <label class="toggle-row"><span><b>Drop shadow</b><small>Give your sticker depth</small></span><input type="checkbox" id="shadow-toggle" checked><i class="toggle-ui"></i></label>
@@ -173,7 +175,7 @@
             </div>
           </div>
 
-          <div class="inspector-panel" data-panel="adjust">
+          <div id="panel-adjust" class="inspector-panel" data-panel="adjust" role="tabpanel" aria-labelledby="tab-adjust" tabindex="0" hidden>
             <div class="control-section">
               <div class="control-heading"><span>01 / IMAGE POSITION</span></div>
               <div class="slider-row"><label for="photo-scale">Image scale</label><output id="scale-value">100%</output></div><input type="range" id="photo-scale" min="35" max="180" value="100">
@@ -205,9 +207,15 @@
         </aside>
       </div>
     </main>
+    <nav class="mobile-nav" aria-label="Main navigation">
+      <button type="button" class="mobile-nav-item active" data-nav="create" aria-current="page"><span class="mobile-nav-glyph" aria-hidden="true">✳</span><span>Create</span></button>
+      <button type="button" class="mobile-nav-item" data-nav="templates"><span class="mobile-nav-glyph" aria-hidden="true">▦</span><span>Styles</span></button>
+      <button type="button" class="mobile-nav-item" data-nav="designs"><span class="mobile-nav-glyph" aria-hidden="true">▧</span><span>Designs</span></button>
+      <button type="button" class="mobile-nav-item" data-nav="brand"><span class="mobile-nav-glyph" aria-hidden="true">◈</span><span>Colours</span></button>
+    </nav>
   </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
   <input type="file" id="file-input" accept="image/png,image/jpeg,image/webp" hidden>
   <input type="file" id="project-input" accept="application/json,.json" hidden>
   <div class="modal-backdrop" id="modal-backdrop" hidden>
@@ -218,10 +226,11 @@
   </div>
   <div class="export-popover" id="export-popover" hidden>
     <button id="import-project-btn" class="import-project-action"><span class="export-type">OPEN</span><span><b>Open project</b><small>Import an editable .json project</small></span></button>
+    <button type="button" id="mobile-share-action" class="mobile-share-action"><span class="export-type">SHARE</span><span><b>Share design</b><small>Save and copy a link</small></span></button>
     <button data-export="sheet"><span class="export-type">SHEET</span><span><b>Sticker sheet builder</b><small>Arrange copies on a print sheet</small></span></button>
     <button data-export="png"><span class="export-type">PNG</span><span><b>Transparent PNG</b><small>Best for sticker printing</small></span></button>
     <button data-export="svg"><span class="export-type">SVG</span><span><b>Vector artwork</b><small>Scalable sticker design</small></span></button>
     <button data-export="json"><span class="export-type">JSON</span><span><b>Design backup</b><small>Save editable settings</small></span></button>
   </div>
-</body>
+<a id="hb-badge" href="https://hatchable.com/?utm_source=badge&amp;utm_medium=app&amp;utm_content=nextover" target="_blank" rel="noopener" style="position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom, 0px));z-index:2147483000;display:inline-flex;align-items:center;gap:6px;font:600 12px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#f5efe2;background:#1f1b14;padding:7px 11px 7px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.14);text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.25);"><svg width="14" height="14" viewBox="51 70 410 410" aria-hidden="true" style="display:block;flex:none"><path d="M 256 80 C 160 80, 110 220, 110 320 C 110 420, 180 470, 256 470 C 332 470, 402 420, 402 320 C 402 220, 352 80, 256 80 Z" fill="#f5b840"/><path d="M 115 280 L 180 320 L 240 260 L 290 310 L 340 250 L 398 305" fill="none" stroke="#1f1b14" stroke-width="40" stroke-linejoin="round" stroke-linecap="round"/></svg>Built on Hatchable</a></body>
 </html>

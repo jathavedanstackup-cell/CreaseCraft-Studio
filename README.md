@@ -1,20 +1,33 @@
 # CreaseCraft Studio
 
-A photo-to-sticker design studio with cricket-focused templates and general-purpose photo sticker customisation.
+CreaseCraft is a responsive photo-to-sticker design studio for cricket teams, players, bat decals, gear and local leagues.
+
+## Features
+- Five templates: Performance, Street, Heritage, League and Blank.
+- Photo upload, drag-and-drop, background removal SDK with a basic flat-edge fallback, image positioning and image colour adjustments.
+- Outline, palette, motif, shadow, typography, custom text and editable graphic shapes.
+- Layer visibility, movement locks, duplication, stacking, position/colour/size/rotation/opacity.
+- Undo/redo, keyboard shortcuts, JSON project import/export, SVG artwork, transparent PNG and physical-size sticker sheets.
+- Local draft recovery and cloud saving/sharing via Hatchable.
 
 ## Project structure
-- public/index.html: Studio UI
-- public/studio.css: Responsive Syne + DM Sans styling
-- public/studio.js: SVG artwork canvas, photo upload, cutout, design controls, layers, PNG/SVG/JSON export, save/load/share UI
-- api/assets.js: Image storage API
-- api/designs.js: Design persistence and share API
-- migrations/001_matchday.sql: PostgreSQL table and indexes
+- public/index.html — editor UI and mobile navigation.
+- public/studio.css — responsive visual system (Syne + DM Sans).
+- public/studio.js — SVG canvas, editor state, history, photo adjustments, layers, import/export and save/share logic.
+- api/assets.js — image storage API.
+- api/designs.js — design persistence and share API.
+- api/source-update.js — optional maintainer source-update ZIP endpoint.
+- migrations/001_matchday.sql — saved-design schema.
+- HATCHABLE-SETUP.md — deployment path mapping.
 
-## Hatchable deployment
-Copy the public directory, api directory, and migrations directory into a Hatchable project with the same paths, then deploy. The migration creates the design table. The Save and Share features require the API routes and database.
+## Deploy / local use
+Deploy public/, api/ and migrations/ together in Hatchable. Save, My Designs and Share require the backend and database; artwork editing and client-side exports work in a static browser server.
 
-## Local use
-Serve the public directory with a static web server for UI testing. PNG, SVG and JSON export work client-side. Database-backed saving and sharing require the Hatchable backend.
+## Keyboard shortcuts
+- Ctrl/Cmd+Z undo; Ctrl/Cmd+Shift+Z redo.
+- Ctrl/Cmd+S save; Ctrl/Cmd+O upload photo; Ctrl/Cmd+Shift+O open JSON project.
+- Ctrl/Cmd+D duplicate; Ctrl/Cmd+[ / ] move a layer in the stack.
+- Arrow keys nudge unlocked layers; Shift+arrow nudges farther. Escape closes a modal/menu.
 
-## Notes
-Google Fonts are loaded externally (Syne and DM Sans). Background removal uses the browser SDK from bgremovers.org and includes a basic edge-colour fallback; review complex edges before printing. Before serving customer data at scale, add account-level ownership, rate limiting, and production privacy controls.
+## Production notes
+Background removal falls back to simple edge-colour removal only; review complex edges before printing. The sticker sheet is not a machine-specific cut contour and adds no print bleed. Saved designs currently use a browser-generated studio key, not a signed-in end-user account; add account ownership, rate limits and privacy/retention controls before scaling.

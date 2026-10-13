@@ -191,11 +191,12 @@
     if (!layers.length) { box.innerHTML = '<div class="layer-empty">Add text or upload an image to start.</div>'; return; }
     box.innerHTML = layers.map(l => {
       const id=escapeText(l.id), hidden=l.visible ? "" : " is-hidden", locked=l.locked ? " is-locked" : "";
-      const visibleAction='<button class="layer-action" data-layer-visibility="' + id + '" title="' + (l.visible ? "Hide layer" : "Show layer") + '" aria-label="' + (l.visible ? "Hide layer" : "Show layer") + '">' + (l.visible ? "◉" : "○") + '</button>';
-      const lockAction='<button class="layer-action" data-layer-lock="' + id + '" title="' + (l.locked ? "Unlock movement" : "Lock movement") + '" aria-label="' + (l.locked ? "Unlock movement" : "Lock movement") + '">' + (l.locked ? "▣" : "◇") + '</button>';
-      const objectActions=l.photo ? "" : '<button class="layer-action" data-duplicate-layer="' + id + '" title="Duplicate layer" aria-label="Duplicate layer">⧉</button><button class="layer-action" data-layer-up="' + id + '" title="Move layer up" aria-label="Move layer up">↑</button><button class="layer-action" data-layer-down="' + id + '" title="Move layer down" aria-label="Move layer down">↓</button>';
-      const deleteAction=l.core ? "" : '<button class="layer-action layer-remove" data-remove-layer="' + id + '" title="Delete layer" aria-label="Delete layer">×</button>';
-      return '<div class="layer-row ' + (selectedLayer === l.id ? "selected" : "") + hidden + locked + '" data-select-layer="' + id + '" title="Select ' + escapeText(l.name) + '"><span class="layer-kind">' + escapeText(l.kind) + '</span><span class="layer-name">' + escapeText(l.name) + '</span><div class="layer-actions">' + visibleAction + lockAction + objectActions + deleteAction + '</div></div>';
+      const isSelected=selectedLayer===l.id;
+      const visibleAction='<button type="button" class="layer-action" data-layer-visibility="' + id + '" title="' + (l.visible ? "Hide layer" : "Show layer") + '" aria-label="' + (l.visible ? "Hide layer" : "Show layer") + '" aria-pressed="' + String(l.visible) + '">' + (l.visible ? "◉" : "○") + '</button>';
+      const lockAction='<button type="button" class="layer-action" data-layer-lock="' + id + '" title="' + (l.locked ? "Unlock movement" : "Lock movement") + '" aria-label="' + (l.locked ? "Unlock movement" : "Lock movement") + '" aria-pressed="' + String(l.locked) + '">' + (l.locked ? "▣" : "◇") + '</button>';
+      const objectActions=l.photo ? "" : '<button type="button" class="layer-action" data-duplicate-layer="' + id + '" title="Duplicate layer" aria-label="Duplicate layer">⧉</button><button type="button" class="layer-action" data-layer-up="' + id + '" title="Move layer up" aria-label="Move layer up">↑</button><button type="button" class="layer-action" data-layer-down="' + id + '" title="Move layer down" aria-label="Move layer down">↓</button>';
+      const deleteAction=l.core ? "" : '<button type="button" class="layer-action layer-remove" data-remove-layer="' + id + '" title="Delete layer" aria-label="Delete layer">×</button>';
+      return '<div class="layer-row ' + (isSelected ? "selected" : "") + hidden + locked + '" role="group" aria-label="' + escapeText(l.name) + '"><button type="button" class="layer-select-button" data-select-layer="' + id + '" title="Select ' + escapeText(l.name) + '" aria-label="Select ' + escapeText(l.name) + '" aria-pressed="' + String(isSelected) + '"><span class="layer-kind" aria-hidden="true">' + escapeText(l.kind) + '</span><span class="layer-name">' + escapeText(l.name) + '</span></button><div class="layer-actions">' + visibleAction + lockAction + objectActions + deleteAction + '</div></div>';
     }).join("");
   }
   function syncLayerProperties() {
@@ -233,6 +234,7 @@
     $("#photo-saturation").value=cfg.photo_saturation;$("#photo-saturation-value").textContent=cfg.photo_saturation+"%";
     $("#photo-grayscale").value=cfg.photo_grayscale;$("#photo-grayscale-value").textContent=cfg.photo_grayscale+"%";
     $("#photo-sepia").value=cfg.photo_sepia;$("#photo-sepia-value").textContent=cfg.photo_sepia+"%";
+    $$(".outline-option").forEach(b=>{const active=Number(b.dataset.outline)===Number(cfg.outline_width);b.classList.toggle("selected",active);b.setAttribute("aria-pressed",String(active));});
   }
   function syncInputs() {
     $("#team-text").value = (cfg.elements.find(e => e.id === "team") || {}).text || cfg.team || "";
@@ -241,15 +243,21 @@
     $("#font-select").value = cfg.font || "Syne";
     $("#type-color").value = cfg.type_color || cfg.ink;
     $("#motif-select").value = cfg.motif === "star" || cfg.motif === "stripes" ? cfg.motif : cfg.motif;
-    $$(".inspector-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === activeTab));
-    $$(".inspector-panel").forEach(p => p.classList.toggle("active", p.dataset.panel === activeTab));
-    $$(".format-chip").forEach(b => b.classList.toggle("active", b.dataset.format === cfg.format));
-    $$(".format-chip").forEach(b => b.classList.toggle("active", b.dataset.format === cfg.format));
-    $$(".outline-option").forEach(b => b.classList.toggle("selected", Number(b.dataset.outline) === Number(cfg.outline_width)));
-    $$(".palette-option").forEach(b => b.classList.toggle("active", b.dataset.palette === activePalette));
-    $$(".template-card").forEach(b => b.classList.toggle("selected", b.dataset.template === cfg.style));
+    syncTabState(activeTab);
+    $$("[data-format]").forEach(b => { const active=b.dataset.format===cfg.format; b.classList.toggle("active",active); b.setAttribute("aria-pressed",String(active)); });
+    $$(".outline-option").forEach(b => { const active=Number(b.dataset.outline)===Number(cfg.outline_width); b.classList.toggle("selected",active); b.setAttribute("aria-pressed",String(active)); });
+    syncPaletteButtons();
+    $$(".template-card").forEach(b => { const active=b.dataset.template===cfg.style; b.classList.toggle("selected",active); b.setAttribute("aria-pressed",String(active)); });
   }
   let activeTab = "sticker", activePalette = "lime", canvasBg = "checker";
+  let modalReturnFocus = null;
+  function syncPaletteButtons() {
+    $$(".palette-option").forEach(b => { const active=b.dataset.palette===activePalette; b.classList.toggle("active",active); b.setAttribute("aria-pressed",String(active)); });
+  }
+  function syncTabState(tab=activeTab) {
+    $$(".inspector-tab").forEach(b => { const active=b.dataset.tab===tab; b.classList.toggle("active",active); b.setAttribute("aria-selected",String(active)); b.tabIndex=active?0:-1; });
+    $$(".inspector-panel").forEach(p => { const active=p.dataset.panel===tab; p.classList.toggle("active",active); p.hidden=!active; });
+  }
   let zoomLevel = 1;
   function setZoom(value) {
     zoomLevel=Math.max(.5,Math.min(1.6,Math.round(value*10)/10));
@@ -257,9 +265,9 @@
     $("#zoom-label").textContent=Math.round(zoomLevel*100)+"%";
   }
   function chooseTab(tab) {
+    if(!["sticker","type","effects","adjust"].includes(tab))return;
     activeTab = tab;
-    $$(".inspector-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
-    $$(".inspector-panel").forEach(p => p.classList.toggle("active", p.dataset.panel === tab));
+    syncTabState(tab);
   }
   function update(fn, dirty = true) { pushHistory(); fn(); render(); if (dirty) markDirty(); lastSnapshot = snapshotData(); updateUndoButtons(); }
   function updateElement(id, props) {
@@ -268,8 +276,7 @@
   }
   function setFormat(format) {
     update(() => { cfg.format = format; }, true);
-    $$(".format-chip").forEach(b => b.classList.toggle("active", b.dataset.format === format));
-    $$(".product-item").forEach(b => b.classList.toggle("active", b.dataset.format === format));
+    $$("[data-format]").forEach(b=>{const active=b.dataset.format===format;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));});
   }
   function applyTemplate(template) {
     const theme = {
@@ -420,8 +427,17 @@
     const r=await fetch(API+"/designs?key="+encodeURIComponent(studioKey)); const j=await r.json().catch(()=>({}));
     if(!r.ok) throw new Error(j.error || "Couldn't load your saved designs."); return j.designs || [];
   }
+  function showModal() {
+    const backdrop=$("#modal-backdrop");
+    if(backdrop.hidden) {
+      const active=document.activeElement;
+      modalReturnFocus=active&&active.closest&&active.closest("#export-popover")?$("#export-menu-btn"):active;
+    }
+    backdrop.hidden=false;
+    requestAnimationFrame(()=>$("#modal-close")?.focus());
+  }
   async function openLibrary() {
-    $("#modal-title").innerHTML='My designs<span>.</span>'; $("#modal-content").innerHTML='<div class="empty-gallery">Loading your designs…</div>'; $("#modal-backdrop").hidden=false;
+    $("#modal-title").innerHTML='My designs<span>.</span>'; $("#modal-content").innerHTML='<div class="empty-gallery">Loading your designs…</div>'; showModal();
     try {
       const designs=await getDesigns();
       if(!designs.length){$("#modal-content").innerHTML='<div class="empty-gallery"><strong>Your next great sticker starts here.</strong><p>Design something and hit Save. It will show up here when you return.</p><button class="button button-primary" id="start-first-design">＋ Create a design</button></div>';$("#start-first-design").onclick=closeModal;return;}
@@ -433,7 +449,11 @@
       $$("[data-open-design]").forEach(b=>b.addEventListener("click",()=>loadSharedDesign(b.dataset.openDesign,false)));
     } catch(e) { $("#modal-content").innerHTML='<div class="empty-gallery"><strong>Could not load saved designs</strong><p>'+escapeText(e.message)+'</p><button class="button button-ghost" id="retry-library">Try again</button></div>';$("#retry-library").onclick=openLibrary; }
   }
-  function closeModal() { $("#modal-backdrop").hidden=true; }
+  function closeModal() {
+    $("#modal-backdrop").hidden=true;
+    const target=modalReturnFocus;modalReturnFocus=null;
+    if(target&&target.isConnected&&typeof target.focus==="function")target.focus({preventScroll:true});
+  }
   async function loadSharedDesign(code, shared = true) {
     try {
       const res=await fetch(API+"/designs?share="+encodeURIComponent(code));const payload=await res.json().catch(()=>({}));
@@ -542,7 +562,7 @@
   function openSheetBuilder() {
     $("#modal-title").innerHTML='Sticker sheet<span>.</span>';
     $("#modal-content").innerHTML='<div class="sheet-builder"><p class="help-note">Arrange copies of your current design on a physical-size sheet. This uses browser-based SVG layout—no AI API or design credits.</p><div class="sheet-fields"><div class="field"><label for="sheet-paper">Paper size</label><select id="sheet-paper"><option value="a4">A4 · 210 × 297 mm</option><option value="a5">A5 · 148 × 210 mm</option><option value="letter">US Letter · 215.9 × 279.4 mm</option></select></div><div class="property-grid"><div class="field"><label for="sheet-cols">Columns</label><input id="sheet-cols" type="number" min="1" max="5" value="3"></div><div class="field"><label for="sheet-rows">Rows</label><input id="sheet-rows" type="number" min="1" max="12" value="4"></div></div><div class="property-grid"><div class="field"><label for="sheet-width">Sticker width (mm)</label><input id="sheet-width" type="number" min="15" max="80" step="1" value="35"></div><div class="field"><label for="sheet-gap">Spacing (mm)</label><input id="sheet-gap" type="number" min="0" max="20" step="1" value="4"></div></div><div class="field"><label for="sheet-margin">Page margin (mm)</label><input id="sheet-margin" type="number" min="0" max="25" step="1" value="8"></div></div><div id="sheet-status" class="sheet-status"></div><div id="sheet-preview-wrap" class="sheet-preview-wrap" aria-label="Sticker sheet preview"></div><div class="sheet-actions"><button id="sheet-svg-btn" class="button button-ghost">Download sheet SVG</button><button id="sheet-png-btn" class="button button-primary">Download 300 DPI PNG</button></div><p class="help-note">Check your printer’s bleed and cutting requirements before production. The layout exports do not create machine-specific contour paths.</p></div>';
-    $("#modal-backdrop").hidden=false;
+    showModal();
     const refresh=()=>{
       const s=sheetSettings(),status=$("#sheet-status");
       status.className="sheet-status "+(s.fits?"fits":"overflow");
@@ -673,11 +693,17 @@
   }
   function setCanvasBg(mode) {
     canvasBg=mode;$("#canvas-wrap").classList.toggle("checker",mode==="checker");$("#canvas-wrap").classList.toggle("cream",mode==="cream");$("#canvas-wrap").classList.toggle("dark",mode==="dark");
-    $$(".canvas-bg-option").forEach(b=>b.classList.toggle("active",b.dataset.bg===mode));
+    $$(".canvas-bg-option").forEach(b=>{const active=b.dataset.bg===mode;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));});
   }
   function resetDesign() {
     if(!confirm("Reset the current design? This won't delete saved designs."))return;
-    update(()=>{cfg=defaultConfig();photoDataUrl="";originalFile=null;photoWidth=photoHeight=1;selectedLayer="team";activePalette="lime";},true);syncInputs();setCanvasBg("checker");toast("A fresh canvas is ready.");
+    latestShareCode="";
+    const url=new URL(location.href);url.searchParams.delete("share");
+    try { history.replaceState({}, "", url.pathname+url.search+url.hash); } catch {}
+    $("#design-name").value="Untitled sticker";
+    activeTab="sticker";
+    update(()=>{cfg=defaultConfig();photoDataUrl="";originalFile=null;photoWidth=photoHeight=1;selectedLayer="team";activePalette="lime";},true);
+    syncInputs();setCanvasBg("checker");toast("A fresh canvas is ready.");
   }
   async function loadLocalOrShare() {
     const share=new URLSearchParams(location.search).get("share");
@@ -727,12 +753,25 @@
   $("#canvas-wrap").addEventListener("dragleave",()=>$("#canvas-wrap").style.outline="");
   $("#canvas-wrap").addEventListener("drop",e=>{e.preventDefault();$("#canvas-wrap").style.outline="";const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)acceptPhoto(f);});
   $$(".inspector-tab").forEach(b=>b.addEventListener("click",()=>chooseTab(b.dataset.tab)));
-  $$(".format-chip,[data-format].product-item").forEach(b=>b.addEventListener("click",()=>setFormat(b.dataset.format)));
+  $$(".inspector-tab").forEach(b=>b.addEventListener("keydown",e=>{
+    const tabs=$$(".inspector-tab"),index=tabs.indexOf(b);
+    let next=index;
+    if(e.key==="ArrowRight")next=(index+1)%tabs.length;
+    else if(e.key==="ArrowLeft")next=(index-1+tabs.length)%tabs.length;
+    else if(e.key==="Home")next=0;
+    else if(e.key==="End")next=tabs.length-1;
+    else return;
+    e.preventDefault();chooseTab(tabs[next].dataset.tab);tabs[next].focus();
+  }));
+  $$("[data-format]").forEach(b=>b.addEventListener("click",()=>setFormat(b.dataset.format)));
   $$(".template-card").forEach(b=>b.addEventListener("click",()=>applyTemplate(b.dataset.template)));
   $("#all-templates-btn").addEventListener("click",()=>$("#templates-section").scrollIntoView({behavior:"smooth",block:"start"}));
   $$("[data-nav]").forEach(b=>b.addEventListener("click",()=>{
-    $$(".nav-item").forEach(n=>n.classList.toggle("active",n===b));
     const nav=b.dataset.nav;
+    $$("[data-nav]").forEach(n=>{
+      const active=n.dataset.nav===nav;n.classList.toggle("active",active);
+      if(active)n.setAttribute("aria-current","page");else n.removeAttribute("aria-current");
+    });
     if(nav==="designs")openLibrary();
     else if(nav==="templates")$("#templates-section").scrollIntoView({behavior:"smooth",block:"start"});
     else if(nav==="brand"){chooseTab("sticker");$(".control-section:nth-of-type(2)",$('[data-panel="sticker"]')).scrollIntoView({behavior:"smooth",block:"nearest"});toast("Choose a brand palette or set your own colours.");}
@@ -740,18 +779,18 @@
   }));
   $$("[data-outline]").forEach(b=>b.addEventListener("click",()=>update(()=>{cfg.outline_width=Number(b.dataset.outline);syncSmallValues();},true)));
   $("#outline-width").addEventListener("input",e=>{cfg.outline_width=Number(e.target.value);syncSmallValues();render();markDirty();lastSnapshot=snapshotData();});
-  $("#outline-color").addEventListener("input",e=>{cfg.outline_color=e.target.value;syncSmallValues();render();markDirty();lastSnapshot=snapshotData();});
-  $$("[data-color]").forEach(b=>b.addEventListener("click",()=>{cfg.outline_color=b.dataset.color;syncSmallValues();render();markDirty();lastSnapshot=snapshotData();}));
+  $("#outline-color").addEventListener("input",e=>{activePalette="";syncPaletteButtons();cfg.outline_color=e.target.value;syncSmallValues();render();markDirty();lastSnapshot=snapshotData();});
+  $$("[data-color]").forEach(b=>b.addEventListener("click",()=>{activePalette="";syncPaletteButtons();cfg.outline_color=b.dataset.color;syncSmallValues();render();markDirty();lastSnapshot=snapshotData();}));
   $$("[data-palette]").forEach(b=>b.addEventListener("click",()=>{
     const p=palettes[b.dataset.palette];if(!p)return;
     update(()=>{activePalette=b.dataset.palette;cfg.accent=p.accent;cfg.ink=p.ink;cfg.outline_color=p.outline;cfg.elements.forEach(e=>{if(e.id==="number")e.color=cfg.accent;if(e.id==="team"||e.id==="tagline")e.color=cfg.ink;});syncInputs();},true);
   }));
-  $("#accent-color").addEventListener("input",e=>{cfg.accent=e.target.value;updateElement("number",{color:cfg.accent});syncSmallValues();render();markDirty();lastSnapshot=snapshotData();});
+  $("#accent-color").addEventListener("input",e=>{activePalette="";syncPaletteButtons();cfg.accent=e.target.value;updateElement("number",{color:cfg.accent});syncSmallValues();render();markDirty();lastSnapshot=snapshotData();});
   $("#team-text").addEventListener("input",e=>{cfg.team=e.target.value;updateElement("team",{text:e.target.value});render();markDirty();lastSnapshot=snapshotData();});
   $("#number-text").addEventListener("input",e=>{cfg.number=e.target.value;updateElement("number",{text:e.target.value,color:cfg.accent});render();markDirty();lastSnapshot=snapshotData();});
   $("#tagline-text").addEventListener("input",e=>{cfg.tagline=e.target.value;updateElement("tagline",{text:e.target.value});render();markDirty();lastSnapshot=snapshotData();});
   $("#font-select").addEventListener("change",e=>update(()=>{cfg.font=e.target.value;cfg.elements.filter(x=>["team","number","tagline"].includes(x.id)).forEach(x=>x.font=cfg.font);},true));
-  $("#type-color").addEventListener("input",e=>{cfg.type_color=e.target.value;update(()=>{cfg.ink=e.target.value;cfg.elements.forEach(x=>{if(x.id==="team"||x.id==="tagline")x.color=e.target.value;});},true);});
+  $("#type-color").addEventListener("input",e=>{activePalette="";syncPaletteButtons();cfg.type_color=e.target.value;update(()=>{cfg.ink=e.target.value;cfg.elements.forEach(x=>{if(x.id==="team"||x.id==="tagline")x.color=e.target.value;});},true);});
   $("#layer-x").addEventListener("change",e=>{const el=cfg.elements.find(x=>x.id===selectedLayer);if(!el)return;if(el.locked===true){syncLayerProperties();toast("Movement is locked. Unlock the layer to reposition it.");return;}update(()=>{el.x=Math.max(0,Math.min(760,Number(e.target.value)||0));},true);});
   $("#layer-y").addEventListener("change",e=>{const el=cfg.elements.find(x=>x.id===selectedLayer);if(!el)return;if(el.locked===true){syncLayerProperties();toast("Movement is locked. Unlock the layer to reposition it.");return;}update(()=>{el.y=Math.max(0,Math.min(900,Number(e.target.value)||0));},true);});
   const previewSelectedProperty=(prop,value)=>{const el=cfg.elements.find(x=>x.id===selectedLayer);if(!el)return;el[prop]=value;render();markDirty();};
@@ -783,12 +822,21 @@
   $("#select-tool").addEventListener("click",()=>{ $("#select-tool").classList.add("selected"); toast("Select a photo or text layer on the canvas to move it."); });
   $("#save-btn").addEventListener("click",saveDesign);
   $("#share-btn").addEventListener("click",shareDesign);
+  $("#mobile-share-action").addEventListener("click",()=>{$("#export-popover").hidden=true;shareDesign();});
   $("#import-project-btn").addEventListener("click",()=>{$("#export-popover").hidden=true;projectInput.click();});
   projectInput.addEventListener("change",e=>importProject(e.target.files&&e.target.files[0]));
   $("#export-menu-btn").addEventListener("click",e=>{e.stopPropagation();$("#export-popover").hidden=!$("#export-popover").hidden;});
   $$("[data-export]").forEach(b=>b.addEventListener("click",()=>exportDesign(b.dataset.export)));
   $("#modal-close").addEventListener("click",closeModal);
   $("#modal-backdrop").addEventListener("click",e=>{if(e.target===$("#modal-backdrop"))closeModal();});
+  $("#modal-backdrop").addEventListener("keydown",e=>{
+    if(e.key!=="Tab")return;
+    const focusable=$$('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],[tabindex]:not([tabindex="-1"])',$("#modal-backdrop")).filter(el=>!el.hidden&&el.getClientRects().length);
+    if(!focusable.length){e.preventDefault();return;}
+    const first=focusable[0],last=focusable[focusable.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  });
   const liveEditSelector="#outline-width,#outline-color,#accent-color,#team-text,#number-text,#tagline-text,#shadow-blur,#shadow-opacity,#photo-scale,#photo-rotation,#photo-brightness,#photo-contrast,#photo-saturation,#photo-grayscale,#photo-sepia,#custom-layer-text,#layer-color,#layer-size,#layer-rotation,#layer-opacity";
   document.addEventListener("focusin",e=>{if(e.target&&e.target.matches&&e.target.matches(liveEditSelector))beginLiveEdit();});
   document.addEventListener("pointerdown",e=>{if(e.target&&e.target.matches&&e.target.matches(liveEditSelector))beginLiveEdit();});
@@ -820,7 +868,8 @@
       if(action.dataset.layerDown!==undefined){moveLayer(action.dataset.layerDown,"down");return;}
       if(action.dataset.removeLayer!==undefined){const id=action.dataset.removeLayer;if(id==="photo"){selectLayer(id);deleteSelected();return;}if(id===selectedLayer)selectedLayer="team";update(()=>cfg.elements=cfg.elements.filter(el=>el.id!==id),true);return;}
     }
-    const row=e.target.closest("[data-select-layer]");if(row)selectLayer(row.dataset.selectLayer);
+    const row=e.target.closest("[data-select-layer]");
+    if(row){const id=row.dataset.selectLayer;selectLayer(id);requestAnimationFrame(()=>$("#layer-list [data-select-layer=\""+CSS.escape(id)+"\"]")?.focus({preventScroll:true}));}
   });
   $("#design-name").addEventListener("input",()=>markDirty());
 

@@ -1,7 +1,9 @@
-Hatchable mapping
+# Hatchable setup
+
 - public/* -> public/*
-- api/assets.js -> api/assets.js (endpoint /api/assets)
-- api/designs.js -> api/designs.js (endpoint /api/designs)
+- api/assets.js -> /api/assets
+- api/designs.js -> /api/designs
+- api/source-update.js -> /api/source-update (optional maintainer source-patch ZIP)
 - migrations/001_matchday.sql -> migrations/001_matchday.sql
 
-Keep the static files and API paths together. The browser frontend resolves the API base from window.__HATCHABLE__.api when deployed on Hatchable.
+Apply the migration before relying on Save, My Designs or Share. Keep all paths in the same Hatchable project. The editor does not depend on the optional source-update endpoint.
