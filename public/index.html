@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111413">
+  <meta name="description" content="Turn any photo into a custom sticker. Create cricket graphics, team badges and gear decals with CreaseCraft Studio.">
+  <title>CreaseCraft Studio — Make your image a sticker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/studio.css?v=318dd4932798">
+  <script defer src="/studio.js?v=80c03627c10e"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="CreaseCraft home">
+        <span class="brand-mark"><svg viewBox="0 0 44 44" aria-hidden="true"><path d="M26 4 8 22l18 18h10L20 22 36 4z" fill="currentColor"/><path d="M22 17h19v8H22z" fill="currentColor"/><path d="M5 29h19v7H5z" fill="currentColor" opacity=".55"/></svg></span>
+        <span class="brand-type"><strong>CREASECRAFT</strong><small>STICKER STUDIO</small></span>
+      </a>
+      <div class="side-label">WORKSPACE</div>
+      <button class="nav-item active" data-nav="create"><span class="nav-glyph">✳</span><span>Create design</span></button>
+      <button class="nav-item" data-nav="templates"><span class="nav-glyph">▦</span><span>Templates</span><span class="nav-count">12</span></button>
+      <button class="nav-item" data-nav="designs"><span class="nav-glyph">▧</span><span>My designs</span></button>
+      <button class="nav-item" data-nav="brand"><span class="nav-glyph">◈</span><span>Brand colours</span></button>
+      <div class="side-separator"></div>
+      <div class="side-label">START WITH A FORMAT</div>
+      <button class="product-item" data-format="diecut"><span class="product-icon">✂</span><span><b>Photo sticker</b><small>Any image, your style</small></span></button>
+      <button class="product-item" data-format="bat"><span class="product-icon">╱</span><span><b>Bat decal</b><small>Custom name & number</small></span></button>
+      <button class="product-item" data-format="helmet"><span class="product-icon">⬡</span><span><b>Helmet & gear</b><small>Make your kit yours</small></span></button>
+      <button class="product-item" data-format="badge"><span class="product-icon">♜</span><span><b>Team / league badge</b><small>Identity that stands out</small></span></button>
+      <div class="sidebar-bottom">
+        <div class="tip-card"><span class="tip-spark">✦</span><b>Your design. Your rules.</b><p>Start with any photo. Finish with a sticker that feels like you.</p></div>
+        <div class="user-chip"><div class="avatar">CC</div><span><b>Creator workspace</b><small>Local studio</small></span><span class="online-dot"></span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="mobile-brand"><span class="brand-mark small-mark">C</span><strong>CREASECRAFT</strong></div>
+        <div class="project-title"><span class="eyebrow">CURRENT PROJECT</span><input id="design-name" maxlength="70" value="Untitled sticker" aria-label="Design name"></div>
+        <div class="top-actions">
+          <span id="save-status" class="save-status"><i></i><span>All changes local</span></span>
+          <button class="icon-button" id="undo-btn" title="Undo" aria-label="Undo">↶</button>
+          <button class="icon-button" id="redo-btn" title="Redo" aria-label="Redo">↷</button>
+          <span class="top-divider"></span>
+          <button class="button button-ghost" id="save-btn">↓ Save</button>
+          <button class="button button-ghost" id="share-btn"><span>↗</span> Share</button>
+          <button class="button button-primary" id="export-menu-btn"><span>↓</span> Export <span class="chevron">⌄</span></button>
+        </div>
+      </header>
+
+      <div class="studio-content">
+        <section class="workspace">
+          <div class="canvas-toolbar">
+            <div class="tool-tag"><span class="status-pulse"></span><span id="canvas-context">STICKER CANVAS</span></div>
+            <div class="canvas-tools">
+              <button class="button button-ghost mini-action" id="toolbar-upload-btn">＋ Upload image</button>
+              <button class="button button-lime-soft mini-action" id="remove-bg-btn">✦ AI cutout</button>
+              <span class="zoom-label">100%</span>
+              <button class="icon-button compact" id="reset-view-btn" title="Reset view">⌗</button>
+              <button class="icon-button compact" id="checker-btn" title="Toggle checkerboard">▦</button>
+              <button class="icon-button compact" id="fit-btn" title="Fit canvas">⤢</button>
+            </div>
+          </div>
+          <div class="canvas-wrap" id="canvas-wrap">
+            <div class="canvas-grid"></div>
+            <div class="canvas-stage" id="canvas-stage">
+              <svg id="sticker-svg" viewBox="0 0 760 900" role="img" aria-label="Live sticker design preview" xmlns="http://www.w3.org/2000/svg"></svg>
+            </div>
+            <div id="canvas-empty" class="canvas-empty">
+              <div class="empty-orbit"><span>✳</span></div>
+              <h2>Your canvas is<br><em>wide open.</em></h2>
+              <p>Drop in any photo and make it yours.</p>
+              <button class="button button-dark" id="empty-upload-btn">＋ Upload an image</button>
+              <div class="accepted-types">JPG · PNG · WEBP · UP TO 15 MB</div>
+            </div>
+            <div class="canvas-corner-note"><span>✳</span> MADE TO STAND OUT</div>
+            <div class="canvas-bottom-tools"><button id="select-tool" class="mini-tool selected" title="Select and move">↖</button><button id="center-photo-btn" class="mini-tool" title="Center selected layer">⊙</button><button id="delete-layer-btn" class="mini-tool" title="Delete selected layer">⌫</button></div>
+          </div>
+          <div class="canvas-footer">
+            <div><span class="footer-dot"></span><span id="canvas-footer-status">Ready when you are</span></div>
+            <span class="dimensions-label">WORKSPACE · 760 × 900</span>
+          </div>
+          <section class="templates-section" id="templates-section">
+            <div class="section-heading"><div><span class="eyebrow">A LITTLE CREATIVE HEAD START</span><h2>Start with a style<span>.</span></h2></div><button class="text-link" id="all-templates-btn">Explore styles <span>↗</span></button></div>
+            <div class="template-strip">
+              <button class="template-card selected" data-template="performance"><span class="template-art art-performance"><b>07</b><i>↗</i></span><span class="template-name">Performance</span><small>Bold. Fast. Fearless.</small></button>
+              <button class="template-card" data-template="street"><span class="template-art art-street"><b>CC</b><i>✳</i></span><span class="template-name">Street cut</span><small>Graphic energy.</small></button>
+              <button class="template-card" data-template="heritage"><span class="template-art art-heritage"><b>XI</b><i>♜</i></span><span class="template-name">Club heritage</span><small>Classic club identity.</small></button>
+              <button class="template-card" data-template="league"><span class="template-art art-league"><b>★</b><i>26</i></span><span class="template-name">League edition</span><small>Built for matchday.</small></button>
+              <button class="template-card blank-template" data-template="blank"><span class="template-art art-blank"><b>＋</b></span><span class="template-name">Blank canvas</span><small>Your idea, from zero.</small></button>
+            </div>
+          </section>
+        </section>
+
+        <aside class="inspector">
+          <div class="inspector-header"><div><span class="eyebrow">CREATIVE CONTROLS</span><h2>Make it yours<span>.</span></h2></div><button class="icon-button compact" id="reset-design-btn" title="Reset design">⟳</button></div>
+          <div class="inspector-tabs" role="tablist">
+            <button class="inspector-tab active" data-tab="sticker">Sticker</button><button class="inspector-tab" data-tab="type">Type</button><button class="inspector-tab" data-tab="effects">Effects</button><button class="inspector-tab" data-tab="adjust">Adjust</button>
+          </div>
+
+          <div class="inspector-panel active" data-panel="sticker">
+            <div class="control-section">
+              <div class="control-heading"><span>01 / OUTLINE</span><span class="tiny-badge">DIECUT</span></div>
+              <div class="outline-options">
+                <button class="outline-option" data-outline="0" title="No outline"><span class="outline-preview no-outline"></span></button>
+                <button class="outline-option selected" data-outline="12" title="White border"><span class="outline-preview white-outline"></span></button>
+                <button class="outline-option" data-outline="18" title="Bold border"><span class="outline-preview bold-outline"></span></button>
+                <button class="outline-option" data-outline="8" title="Fine border"><span class="outline-preview fine-outline"></span></button>
+              </div>
+              <div class="slider-row"><label for="outline-width">Thickness</label><output id="outline-value">12 px</output></div>
+              <input type="range" id="outline-width" min="0" max="28" value="12">
+              <div class="slider-scale"><span>Fine</span><span>Chunky</span></div>
+              <div class="field-label-row"><label for="outline-color">Outline colour</label><span class="eyebrow">HEX / PICKER</span></div>
+              <div class="color-input-row"><input type="color" id="outline-color" value="#FFFFFF"><div class="color-hex"><span id="outline-hex">#FFFFFF</span><span>↗</span></div><button class="swatch" data-color="#FFFFFF" style="--swatch:#FFFFFF" aria-label="White"></button><button class="swatch" data-color="#C9F34A" style="--swatch:#C9F34A" aria-label="Lime"></button><button class="swatch" data-color="#171B1A" style="--swatch:#171B1A" aria-label="Black"></button></div>
+            </div>
+            <div class="control-section">
+              <div class="control-heading"><span>02 / COLOUR PALETTE</span><span class="eyebrow">QUICK APPLY</span></div>
+              <div class="palette-row">
+                <button class="palette-option active" data-palette="lime" aria-label="Electric lime"><span style="--p:#C9F34A"></span><small>Electric</small></button>
+                <button class="palette-option" data-palette="mono" aria-label="Monochrome"><span style="--p:#EDEAE2"></span><small>Mono</small></button>
+                <button class="palette-option" data-palette="ember" aria-label="Ember"><span style="--p:#FF795F"></span><small>Ember</small></button>
+                <button class="palette-option" data-palette="ocean" aria-label="Ocean"><span style="--p:#75D8DF"></span><small>Ocean</small></button>
+              </div>
+              <div class="field-label-row"><label for="accent-color">Accent colour</label><span class="eyebrow">CUSTOM</span></div>
+              <div class="color-input-row"><input type="color" id="accent-color" value="#C9F34A"><div class="color-hex"><span id="accent-hex">#C9F34A</span><span>↗</span></div></div>
+            </div>
+            <div class="control-section">
+              <div class="control-heading"><span>03 / FORMAT</span></div>
+              <div class="format-select-grid">
+                <button class="format-chip active" data-format="diecut"><span>✳</span> Die-cut</button>
+                <button class="format-chip" data-format="bat"><span>╱</span> Bat decal</button>
+                <button class="format-chip" data-format="helmet"><span>⬡</span> Gear decal</button>
+                <button class="format-chip" data-format="badge"><span>♜</span> Team badge</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="inspector-panel" data-panel="type">
+            <div class="control-section">
+              <div class="control-heading"><span>01 / ADD TYPOGRAPHY</span></div>
+              <button class="add-type-button" id="add-text-btn"><span class="type-icon">T</span><span><b>Add a text layer</b><small>Player name, number, team or tagline</small></span><span class="add-symbol">＋</span></button>
+              <div class="field"><label for="team-text">Team / main text</label><input type="text" id="team-text" maxlength="30" value="NORTHSIDE" placeholder="Your team name"></div>
+              <div class="field"><label for="number-text">Number / short text</label><input type="text" id="number-text" maxlength="4" value="07" placeholder="07"></div>
+              <div class="field"><label for="tagline-text">Tagline</label><input type="text" id="tagline-text" maxlength="40" value="MADE TO STAND OUT" placeholder="Your tagline"></div>
+              <div class="field"><label for="font-select">Display typeface</label><select id="font-select"><option value="Syne">Syne · Expressive</option><option value="DM Sans">DM Sans · Clean</option></select></div>
+              <div class="field"><label for="type-color">Type colour</label><input type="color" id="type-color" value="#191D1E"></div>
+              <p class="help-note">Text fields update the sticker live. Use the layer list to move added text around the canvas.</p>
+            </div>
+          </div>
+
+          <div class="inspector-panel" data-panel="effects">
+            <div class="control-section">
+              <div class="control-heading"><span>01 / FINISH</span></div>
+              <label class="toggle-row"><span><b>Drop shadow</b><small>Give your sticker depth</small></span><input type="checkbox" id="shadow-toggle" checked><i class="toggle-ui"></i></label>
+              <div class="slider-row"><label for="shadow-blur">Blur</label><output id="blur-value">18 px</output></div><input type="range" id="shadow-blur" min="0" max="42" value="18">
+              <div class="slider-row"><label for="shadow-opacity">Opacity</label><output id="shadow-opacity-value">42%</output></div><input type="range" id="shadow-opacity" min="0" max="90" value="42">
+              <div class="field"><label for="motif-select">Graphic accent</label><select id="motif-select"><option value="bolt">Lightning bolt</option><option value="star">Star burst</option><option value="stripes">Speed stripes</option><option value="none">None</option></select></div>
+              <p class="help-note">Effects stay inside the design and are included in PNG export.</p>
+            </div>
+          </div>
+
+          <div class="inspector-panel" data-panel="adjust">
+            <div class="control-section">
+              <div class="control-heading"><span>01 / IMAGE POSITION</span></div>
+              <div class="slider-row"><label for="photo-scale">Image scale</label><output id="scale-value">100%</output></div><input type="range" id="photo-scale" min="35" max="180" value="100">
+              <div class="slider-row"><label for="photo-rotation">Rotation</label><output id="rotation-value">0°</output></div><input type="range" id="photo-rotation" min="-35" max="35" value="0">
+              <button class="button button-ghost full-width" id="center-image-btn">◎ Centre image</button>
+              <div class="control-heading section-top"><span>02 / CANVAS</span></div>
+              <div class="field-label-row"><label>Preview background</label></div>
+              <div class="palette-row">
+                <button class="canvas-bg-option active" data-bg="checker"><span class="checker-swatch"></span><small>Transparent</small></button>
+                <button class="canvas-bg-option" data-bg="cream"><span style="--p:#F3F0E8"></span><small>Warm</small></button>
+                <button class="canvas-bg-option" data-bg="dark"><span style="--p:#191D1E"></span><small>Dark</small></button>
+              </div>
+              <p class="help-note">Canvas background is for preview only. Exported PNG stays transparent outside your sticker artwork.</p>
+            </div>
+          </div>
+
+          <div class="layer-section">
+            <div class="layer-heading"><span>LAYERS <span id="layer-count">0</span></span><button class="icon-button compact" id="add-layer-btn" title="Add text layer">＋</button></div>
+            <div id="layer-list" class="layer-list"><div class="layer-empty">Your layers will appear here.</div></div>
+          </div>
+          <div class="inspector-footer"><span class="privacy-mark">◇</span><span>Your uploaded image is processed in your browser for cutout. Save it when you want to keep the design.</span></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <input type="file" id="file-input" accept="image/png,image/jpeg,image/webp" hidden>
+  <div class="modal-backdrop" id="modal-backdrop" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head"><div><span class="eyebrow">YOUR CREATIVE WORKSPACE</span><h2 id="modal-title">My designs<span>.</span></h2></div><button class="icon-button" id="modal-close" aria-label="Close">×</button></div>
+      <div id="modal-content" class="modal-content"></div>
+    </section>
+  </div>
+  <div class="export-popover" id="export-popover" hidden>
+    <button data-export="png"><span class="export-type">PNG</span><span><b>Transparent PNG</b><small>Best for sticker printing</small></span></button>
+    <button data-export="svg"><span class="export-type">SVG</span><span><b>Vector artwork</b><small>Scalable sticker design</small></span></button>
+    <button data-export="json"><span class="export-type">JSON</span><span><b>Design backup</b><small>Save editable settings</small></span></button>
+  </div>
+</body>
+</html>
