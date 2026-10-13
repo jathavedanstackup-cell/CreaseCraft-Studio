@@ -152,12 +152,12 @@
     for (const el of (Array.isArray(c.elements) ? c.elements : [])) {
       if (el.visible === false) continue;
       if (el.type === "shape") {
-        out += '<g data-layer="' + escapeText(el.id) + '" class="sticker-layer" opacity="' + Number(el.opacity || 1) + '">' + shapeMarkup(el.shape, el.x, el.y, el.size, el.color, el.rotation) + '</g>';
+        out += '<g data-layer="' + escapeText(el.id) + '" class="sticker-layer" opacity="' + Number(el.opacity ?? 1) + '">' + shapeMarkup(el.shape, el.x, el.y, el.size, el.color, el.rotation) + '</g>';
       } else {
         const isCore = ["team","number","tagline"].includes(el.id);
         const size = Number(el.size || defaultSize[0]);
         const stroke = c.outline_width > 0 ? ' stroke="' + c.outline_color + '" stroke-width="' + Math.max(0, c.outline_width/2.5) + '" stroke-linejoin="round" paint-order="stroke fill"' : "";
-        out += '<text data-layer="' + escapeText(el.id) + '" class="sticker-layer" x="' + Number(el.x) + '" y="' + Number(el.y) + '" transform="rotate(' + Number(el.rotation || 0) + ' ' + Number(el.x) + ' ' + Number(el.y) + ')" text-anchor="middle" dominant-baseline="middle" font-family="' + (el.font === "DM Sans" ? "DM Sans,sans-serif" : "Syne,sans-serif") + '" font-size="' + size + '" font-weight="' + (el.weight === "normal" ? "500" : "800") + '" letter-spacing="' + (el.id === "tagline" ? 1.8 : -1.3) + '" fill="' + (el.color || c.ink) + '"' + stroke + ' opacity="' + Number(el.opacity || 1) + '">' + escapeText(el.text) + '</text>';
+        out += '<text data-layer="' + escapeText(el.id) + '" class="sticker-layer" x="' + Number(el.x) + '" y="' + Number(el.y) + '" transform="rotate(' + Number(el.rotation || 0) + ' ' + Number(el.x) + ' ' + Number(el.y) + ')" text-anchor="middle" dominant-baseline="middle" font-family="' + (el.font === "DM Sans" ? "DM Sans,sans-serif" : "Syne,sans-serif") + '" font-size="' + size + '" font-weight="' + (el.weight === "normal" ? "500" : "800") + '" letter-spacing="' + (el.id === "tagline" ? 1.8 : -1.3) + '" fill="' + (el.color || c.ink) + '"' + stroke + ' opacity="' + Number(el.opacity ?? 1) + '">' + escapeText(el.text) + '</text>';
       }
     }
     if (interactive && selectedLayer) {
@@ -192,7 +192,7 @@
     box.innerHTML = layers.map(l => {
       const id=escapeText(l.id), hidden=l.visible ? "" : " is-hidden", locked=l.locked ? " is-locked" : "";
       const visibleAction='<button class="layer-action" data-layer-visibility="' + id + '" title="' + (l.visible ? "Hide layer" : "Show layer") + '" aria-label="' + (l.visible ? "Hide layer" : "Show layer") + '">' + (l.visible ? "◉" : "○") + '</button>';
-      const lockAction='<button class="layer-action" data-layer-lock="' + id + '" title="' + (l.locked ? "Unlock layer" : "Lock layer") + '" aria-label="' + (l.locked ? "Unlock layer" : "Lock layer") + '">' + (l.locked ? "▣" : "◇") + '</button>';
+      const lockAction='<button class="layer-action" data-layer-lock="' + id + '" title="' + (l.locked ? "Unlock movement" : "Lock movement") + '" aria-label="' + (l.locked ? "Unlock movement" : "Lock movement") + '">' + (l.locked ? "▣" : "◇") + '</button>';
       const objectActions=l.photo ? "" : '<button class="layer-action" data-duplicate-layer="' + id + '" title="Duplicate layer" aria-label="Duplicate layer">⧉</button><button class="layer-action" data-layer-up="' + id + '" title="Move layer up" aria-label="Move layer up">↑</button><button class="layer-action" data-layer-down="' + id + '" title="Move layer down" aria-label="Move layer down">↓</button>';
       const deleteAction=l.core ? "" : '<button class="layer-action layer-remove" data-remove-layer="' + id + '" title="Delete layer" aria-label="Delete layer">×</button>';
       return '<div class="layer-row ' + (selectedLayer === l.id ? "selected" : "") + hidden + locked + '" data-select-layer="' + id + '" title="Select ' + escapeText(l.name) + '"><span class="layer-kind">' + escapeText(l.kind) + '</span><span class="layer-name">' + escapeText(l.name) + '</span><div class="layer-actions">' + visibleAction + lockAction + objectActions + deleteAction + '</div></div>';
@@ -203,6 +203,9 @@
     if(!panel)return;
     panel.hidden=!el;
     if(!el)return;
+    const movementLocked=el.locked===true;
+    $("#layer-x").disabled=movementLocked;$("#layer-y").disabled=movementLocked;
+    $("#layer-x").title=movementLocked?"Unlock movement to edit this position":"";$("#layer-y").title=movementLocked?"Unlock movement to edit this position":"";
     $("#layer-x").value=Math.round(Number(el.x)||0);$("#layer-y").value=Math.round(Number(el.y)||0);
     $("#layer-color").value=safeHex(el.color,cfg.ink||"#191D1E");
     $("#layer-size").value=Math.max(8,Math.min(240,Number(el.size)||46));$("#layer-size-value").textContent=String(Math.round(Number(el.size)||46));
@@ -349,7 +352,7 @@
       photoDataUrl = await fileToDataUrl(new File([blob], "creasecraft-cutout.png", {type:"image/png"}));
       originalFile = new File([blob], "creasecraft-cutout.png", {type:"image/png"});
       const img = await loadImage(photoDataUrl); photoWidth = img.naturalWidth; photoHeight = img.naturalHeight;
-      cfg.photo_key = ""; cfg.photo_name = (cfg.photo_name || "Sticker").replace(/.[^.]+$/, "") + "-cutout.png";
+      cfg.photo_key = ""; cfg.photo_name = (cfg.photo_name || "Sticker").replace(/\.[^.]+$/, "") + "-cutout.png";
       render(); markDirty(); lastSnapshot = snapshotData(); toast("Background removed. Your transparent cutout is ready.");
     } catch (err) {
       console.error("Background removal:", err);
@@ -369,7 +372,7 @@
         ctx.putImageData(imageData,0,0);
         const fallbackUrl = c.toDataURL("image/png");
         const fallbackImg = await loadImage(fallbackUrl);
-        pushHistory(); photoDataUrl=fallbackUrl; originalFile=null; photoWidth=fallbackImg.naturalWidth; photoHeight=fallbackImg.naturalHeight; cfg.photo_key=""; cfg.photo_name=(cfg.photo_name||"Sticker").replace(/.[^.]+$/,"")+"-quick-cutout.png";
+        pushHistory(); photoDataUrl=fallbackUrl; originalFile=null; photoWidth=fallbackImg.naturalWidth; photoHeight=fallbackImg.naturalHeight; cfg.photo_key=""; cfg.photo_name=(cfg.photo_name||"Sticker").replace(/\.[^.]+$/,"")+"-quick-cutout.png";
         render(); markDirty(); lastSnapshot=snapshotData();
         toast("Quick cutout applied to edge-matching background pixels. Review the edges; complex photos need the AI engine.");
       } catch (fallbackErr) {
@@ -435,15 +438,22 @@
     try {
       const res=await fetch(API+"/designs?share="+encodeURIComponent(code));const payload=await res.json().catch(()=>({}));
       if(!res.ok||!payload.design)throw new Error(payload.error||"Could not open this design.");
-      pushHistory(); const d=payload.design; cfg={...defaultConfig(),...(d.config||{})}; cfg.elements=Array.isArray(cfg.elements)?cfg.elements:baseElements();
-      photoDataUrl="";originalFile=null;latestShareCode=d.share_code;selectedLayer=cfg.photo_key?"photo":"team";$("#design-name").value=d.design_name||"Shared design";
-      activePalette=Object.keys(palettes).find(k=>palettes[k].accent===cfg.accent)||"";
-      if(cfg.photo_key) {
-        const img=await loadImage(imageHref());photoWidth=img.naturalWidth||1;photoHeight=img.naturalHeight||1;
+      const d=payload.design,nextCfg={...defaultConfig(),...(d.config||{})};
+      nextCfg.elements=Array.isArray(nextCfg.elements)?nextCfg.elements:baseElements();
+      let nextPhotoWidth=1,nextPhotoHeight=1;
+      if(nextCfg.photo_key) {
+        const photoURL=new URL(API+"/assets?key="+encodeURIComponent(nextCfg.photo_key),location.origin).href;
+        const img=await loadImage(photoURL);nextPhotoWidth=img.naturalWidth||1;nextPhotoHeight=img.naturalHeight||1;
       }
+      const nextSelected=nextCfg.photo_key?"photo":"team";
+      pushHistory();
+      cfg=nextCfg;photoDataUrl="";originalFile=null;photoWidth=nextPhotoWidth;photoHeight=nextPhotoHeight;
+      latestShareCode=d.share_code;selectedLayer=nextSelected;$("#design-name").value=d.design_name||"Shared design";
+      activePalette=Object.keys(palettes).find(k=>palettes[k].accent===cfg.accent)||"";
       syncInputs();render();closeModal();lastSnapshot=snapshotData();setStatus("Shared design loaded","saved");
       if(shared)toast("Shared design loaded. Make it your own.");
-    }catch(e){toast(e.message||"Could not open design.");}
+      return true;
+    }catch(e){toast(e.message||"Could not open design.");return false;}
   }
   async function shareDesign() {
     const d=await saveDesign(); if(!d)return;
@@ -483,17 +493,28 @@
     try {
       const payload=JSON.parse(await file.text());
       if(!payload||typeof payload!=="object"||(payload.app&&payload.app!=="CreaseCraft Studio"))throw new Error("This isn't a CreaseCraft project file.");
-      const raw=payload.config||payload.cfg;if(!raw||typeof raw!=="object")throw new Error("The project file is missing its design configuration.");
+      const raw=payload.config||payload.cfg;if(!raw||typeof raw!=="object"||Array.isArray(raw))throw new Error("The project file is missing its design configuration.");
       const embedded=typeof payload.photoDataUrl==="string"?payload.photoDataUrl:(payload.photo&&typeof payload.photo.data_url==="string"?payload.photo.data_url:"");
       if(embedded&&!/^data:image\/(png|jpeg|webp);base64,/i.test(embedded))throw new Error("The embedded image format is not supported.");
-      pushHistory();cfg=normaliseProjectConfig(raw);photoDataUrl=embedded;originalFile=null;latestShareCode="";
-      const name=typeof payload.name==="string"?payload.name:typeof payload.design_name==="string"?payload.design_name:"Imported sticker";$("#design-name").value=name.slice(0,70);
-      if(embedded){const img=await loadImage(embedded);photoWidth=img.naturalWidth||Number(payload.photoWidth)||1;photoHeight=img.naturalHeight||Number(payload.photoHeight)||1;cfg.photo_key="";}
-      else if(cfg.photo_key){const img=await loadImage(imageHref());photoWidth=img.naturalWidth||1;photoHeight=img.naturalHeight||1;}
-      else {photoWidth=photoHeight=1;}
-      selectedLayer=typeof payload.selectedLayer==="string"?payload.selectedLayer:(embedded||cfg.photo_key?"photo":"team");
-      if(selectedLayer!=="photo"&&!cfg.elements.some(e=>e.id===selectedLayer))selectedLayer="team";
-      activePalette=Object.keys(palettes).find(k=>palettes[k].accent===cfg.accent)||"";syncInputs();render();markDirty();lastSnapshot=snapshotData();closeModal();toast("Editable project opened.");
+      const nextCfg=normaliseProjectConfig(raw);
+      let nextPhotoWidth=1,nextPhotoHeight=1;
+      if(embedded) {
+        const img=await loadImage(embedded);
+        nextPhotoWidth=img.naturalWidth||Number(payload.photoWidth)||1;nextPhotoHeight=img.naturalHeight||Number(payload.photoHeight)||1;
+        nextCfg.photo_key="";
+      } else if(nextCfg.photo_key) {
+        const photoURL=new URL(API+"/assets?key="+encodeURIComponent(nextCfg.photo_key),location.origin).href;
+        const img=await loadImage(photoURL);nextPhotoWidth=img.naturalWidth||1;nextPhotoHeight=img.naturalHeight||1;
+      }
+      let nextSelected=typeof payload.selectedLayer==="string"?payload.selectedLayer:(embedded||nextCfg.photo_key?"photo":"team");
+      if(nextSelected==="photo"&&!embedded&&!nextCfg.photo_key)nextSelected="team";
+      if(nextSelected!=="photo"&&!nextCfg.elements.some(e=>e.id===nextSelected))nextSelected="team";
+      const nextName=typeof payload.name==="string"?payload.name:typeof payload.design_name==="string"?payload.design_name:"Imported sticker";
+      pushHistory();
+      cfg=nextCfg;photoDataUrl=embedded;originalFile=null;latestShareCode="";
+      photoWidth=nextPhotoWidth;photoHeight=nextPhotoHeight;selectedLayer=nextSelected;$("#design-name").value=nextName.slice(0,70);
+      activePalette=Object.keys(palettes).find(k=>palettes[k].accent===cfg.accent)||"";
+      syncInputs();render();markDirty();lastSnapshot=snapshotData();closeModal();toast("Editable project opened.");
     } catch(e) {toast("Couldn't open project: "+(e.message||"invalid project file"));}
     finally {if(projectInput)projectInput.value="";}
   }
@@ -613,7 +634,7 @@
   }
   function toggleLayerLock(id) {
     update(()=>{if(id==="photo")cfg.photo_locked=cfg.photo_locked!==true;else{const el=cfg.elements.find(e=>e.id===id);if(el)el.locked=el.locked!==true;}},true);
-    toast((id==="photo"?cfg.photo_locked:((cfg.elements.find(e=>e.id===id)||{}).locked===true))?"Layer locked":"Layer unlocked");
+    toast((id==="photo"?cfg.photo_locked:((cfg.elements.find(e=>e.id===id)||{}).locked===true))?"Movement locked":"Movement unlocked");
   }
   function duplicateLayer(id) {
     if(id==="photo"){toast("Image duplication will be added with multi-image support.");return;}
@@ -642,7 +663,13 @@
     update(()=>{cfg.elements=cfg.elements.filter(e=>e.id!==selectedLayer);selectedLayer="photo";},true);toast("Layer deleted.");
   }
   function centerSelected() {
-    update(()=>{if(selectedLayer==="photo"){cfg.photo_x=380;cfg.photo_y=380;cfg.photo_rotation=0;cfg.photo_scale=1;}else{const e=cfg.elements.find(x=>x.id===selectedLayer);if(e){e.x=380;e.y=450;e.rotation=0;}}},true);
+    if(selectedLayer==="photo") {
+      if(cfg.photo_locked===true){toast("Movement is locked. Unlock the photo to reposition it.");return;}
+      update(()=>{cfg.photo_x=380;cfg.photo_y=380;cfg.photo_rotation=0;cfg.photo_scale=1;},true);return;
+    }
+    const selected=cfg.elements.find(x=>x.id===selectedLayer);
+    if(selected&&selected.locked===true){toast("Movement is locked. Unlock the layer to reposition it.");return;}
+    update(()=>{const e=cfg.elements.find(x=>x.id===selectedLayer);if(e){e.x=380;e.y=450;e.rotation=0;}},true);
   }
   function setCanvasBg(mode) {
     canvasBg=mode;$("#canvas-wrap").classList.toggle("checker",mode==="checker");$("#canvas-wrap").classList.toggle("cream",mode==="cream");$("#canvas-wrap").classList.toggle("dark",mode==="dark");
@@ -654,7 +681,11 @@
   }
   async function loadLocalOrShare() {
     const share=new URLSearchParams(location.search).get("share");
-    if(share){await loadSharedDesign(share,false);return;}
+    if(share) {
+      const loaded=await loadSharedDesign(share,false);
+      if(loaded)return;
+      try { history.replaceState({}, "", location.pathname); } catch {}
+    }
     try {
       const local=localStorage.getItem("cc_last_design");
       if(local){const x=JSON.parse(local);if(x&&x.cfg){cfg={...defaultConfig(),...x.cfg};photoDataUrl=x.photoDataUrl||"";photoWidth=Number(x.photoWidth)||1;photoHeight=Number(x.photoHeight)||1;selectedLayer=x.selectedLayer||"team";if(x.designName)$("#design-name").value=String(x.designName).slice(0,70);}}
@@ -721,8 +752,8 @@
   $("#tagline-text").addEventListener("input",e=>{cfg.tagline=e.target.value;updateElement("tagline",{text:e.target.value});render();markDirty();lastSnapshot=snapshotData();});
   $("#font-select").addEventListener("change",e=>update(()=>{cfg.font=e.target.value;cfg.elements.filter(x=>["team","number","tagline"].includes(x.id)).forEach(x=>x.font=cfg.font);},true));
   $("#type-color").addEventListener("input",e=>{cfg.type_color=e.target.value;update(()=>{cfg.ink=e.target.value;cfg.elements.forEach(x=>{if(x.id==="team"||x.id==="tagline")x.color=e.target.value;});},true);});
-  $("#layer-x").addEventListener("change",e=>update(()=>{const el=cfg.elements.find(x=>x.id===selectedLayer);if(el)el.x=Math.max(0,Math.min(760,Number(e.target.value)||0));},true));
-  $("#layer-y").addEventListener("change",e=>update(()=>{const el=cfg.elements.find(x=>x.id===selectedLayer);if(el)el.y=Math.max(0,Math.min(900,Number(e.target.value)||0));},true));
+  $("#layer-x").addEventListener("change",e=>{const el=cfg.elements.find(x=>x.id===selectedLayer);if(!el)return;if(el.locked===true){syncLayerProperties();toast("Movement is locked. Unlock the layer to reposition it.");return;}update(()=>{el.x=Math.max(0,Math.min(760,Number(e.target.value)||0));},true);});
+  $("#layer-y").addEventListener("change",e=>{const el=cfg.elements.find(x=>x.id===selectedLayer);if(!el)return;if(el.locked===true){syncLayerProperties();toast("Movement is locked. Unlock the layer to reposition it.");return;}update(()=>{el.y=Math.max(0,Math.min(900,Number(e.target.value)||0));},true);});
   const previewSelectedProperty=(prop,value)=>{const el=cfg.elements.find(x=>x.id===selectedLayer);if(!el)return;el[prop]=value;render();markDirty();};
   $("#layer-color").addEventListener("input",e=>previewSelectedProperty("color",e.target.value));
   $("#layer-size").addEventListener("input",e=>{previewSelectedProperty("size",Number(e.target.value));$("#layer-size-value").textContent=e.target.value;});
